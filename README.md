@@ -1,1 +1,1 @@
-# digitHome
+# homeDigit
