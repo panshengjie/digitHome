@@ -35,5 +35,5 @@ import MC from "musicConvertor.js"
         log(`homeDigit start on ${this.address().port}`)
     })
 
-    let mc = new MC({ toMP3DIR: `${process.env.INIT_CWD}/test/MC/toMP3` })
+    let mc = new MC(`${process.env.INIT_CWD}/test/MC/toMP3`)
 })()

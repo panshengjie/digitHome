@@ -1,11 +1,13 @@
-FROM node:10
+FROM ubuntu:18.04
 
-WORKDIR /usr/src/app
-COPY package*.json ./
+RUN apt-get install -y curl cuetools shntool flac build-essential
+RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+RUN apt-get install -y nodejs
 
-RUN npm i
+COPY . /src
+RUN cd /src;npm i -g cnpm --registry=https://registry.npm.taobao.org; npm i
 
-COPY . .
+WORKDIR /home/panda/homeDigit
 
 EXPOSE 8080
 CMD ["npm", "start"]
