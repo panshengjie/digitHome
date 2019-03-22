@@ -6,6 +6,7 @@ import bodyParser from "body-parser"
 import cors from "cors"
 import session from 'express-session'
 import { showAllRoutes } from "utils/utils.js"
+import MC from "musicConvertor.js"
 
 (async () => {
     log("homeDigit starting...")
@@ -33,4 +34,6 @@ import { showAllRoutes } from "utils/utils.js"
     app.listen(global.config.web.port, function() {
         log(`homeDigit start on ${this.address().port}`)
     })
+
+    let mc = new MC({ toMP3DIR: `${process.env.INIT_CWD}/test/MC/toMP3` })
 })()

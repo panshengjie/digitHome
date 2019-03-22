@@ -7,6 +7,7 @@
     "start": "babel-node src/index.js"
   },
   "dependencies": {
+    "async-lock": "^1.2.0",
     "babel-polyfill": "^6.26.0",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
@@ -14,6 +15,8 @@
     "express": "^4.16.2",
     "express-list-endpoints": "^3.0.1",
     "express-session": "^1.15.6",
+    "ffmpeg-static": "^2.4.0",
+    "fluent-ffmpeg": "^2.1.2",
     "fs-extra": "^7.0.0",
     "lodash.isequal": "^4.5.0",
     "os": "^0.1.1",
