@@ -43,7 +43,7 @@ class MusicConvertor {
                             } else if (nodePath.extname(file) === ".flac") {
                                 let cueFile = nodePath.join(dir, file.replace(".flac", ".cue"))
                                 if (fs.existsSync(cueFile)) {
-                                    this._split(abs)
+                                    this.add(abs, "_toSplit")
                                 } else {
                                     this.add(abs)
                                 }
@@ -55,25 +55,9 @@ class MusicConvertor {
                 .catch(e => { error(e) })
         }
     }
-    _split = (abs) => {
-        fs.writeFile(nodePath.join(this.watchDIR, "spliting"), "MusicConvertor is spliting on this dir", 'utf8')
-        log(`spliting ${nodePath.basename(abs)}`)
-        let p = spawn("bin/split2flac", [abs, '-of', "@track. @artist - @title.@ext", "-o", nodePath.dirname(abs)])
-        p.stdout.on('data', () => {});
-        p.stderr.on('data', () => {});
-        p.on("exit", code => {
-            if (code) {
-                log(`split2flac exited with fail code: ${code}`)
-            } else {
-                fs.remove(abs).then(() => {
-                    this._scan(nodePath.dirname(abs))
-                }).catch(e => error(e))
-            }
-            fs.remove(nodePath.join(this.watchDIR, "spliting")).catch(e => error(e))
-        })
-    }
     _onJobStart = (job) => {
-        fs.writeFile(nodePath.join(this.watchDIR, "toMP3"), "MusicConvertor is working on this dir", 'utf8')
+        fs.writeFile(nodePath.join(this.watchDIR, "lock"), "MusicConvertor is working on this dir", 'utf8')
+        log(`[MC][${job.type}][start][${nodePath.basename(job.src)}]`)
         this.state.doing.push(job)
     }
     _onJobFinish = (job, err) => {
@@ -87,49 +71,80 @@ class MusicConvertor {
     }
     _spin = () => {
         if (this.state.todos.length) {
-            this._run(this.state.todos.pop())
-        } else if (!this._isSpliting) {
-            fs.remove(nodePath.join(this.watchDIR, "toMP3")).catch(e => error(e))
+            let job = this.state.todos.shift()
+            job && job.run()
+        } else {
+            fs.remove(nodePath.join(this.watchDIR, "lock")).catch(e => error(e))
+            log(`[MC][idle]:all jobs done`)
         }
-    }
-    _run = (job) => {
-        this._onJobStart(job)
-        job.cmd.on('progress', ({ percent }) => {
-                job.progress = Math.round(percent)
-            })
-            .on('error', (err) => {
-                error(`[MC][${job.type}][error][${nodePath.basename(job.src)}]: ${err.message}`)
-                this._onJobFinish(job, err)
-            })
-            .on('end', () => {
-                log(`[MC][${job.type}][done][${nodePath.basename(job.dest)}]`)
-                this._onJobFinish(job)
-            })
-        job.stop = () => {
-            this.cmd.kill()
-        }
-        job.pause = () => {
-            this.cmd.kill('SIGSTOP')
-        }
-        job.resume = () => {
-            this.cmd.kill('SIGCONT')
-        }
-        job.cmd.run()
     }
     _toMP3 = (src) => {
         let dest = nodePath.join(nodePath.dirname(src), nodePath.basename(src).replace(nodePath.extname(src), ".mp3"))
         let job = {
             src: src,
             dest: dest,
-            type: "toMP3",
-            cmd: ffmpeg(src).audioCodec('libmp3lame').audioFrequency(44100).audioBitrate(320).outputOptions("-id3v2_version 3").output(dest)
+            type: "_toMP3",
+            cmd: ffmpeg(src).audioCodec('libmp3lame').audioFrequency(44100).audioBitrate(320).outputOptions("-id3v2_version 3").output(dest),
+        }
+
+        job.run = () => {
+            this._onJobStart(job)
+            job.cmd.on('progress', ({ percent }) => {
+                    job.progress = Math.round(percent)
+                })
+                .on('error', (err) => {
+                    error(`[MC][${job.type}][error][${nodePath.basename(job.src)}]: ${err.message}`)
+                    this._onJobFinish(job, err)
+                })
+                .on('end', () => {
+                    log(`[MC][${job.type}][done][${nodePath.basename(job.src)}]`)
+                    this._onJobFinish(job)
+                })
+            job.stop = () => {
+                this.cmd.kill()
+            }
+            job.pause = () => {
+                this.cmd.kill('SIGSTOP')
+            }
+            job.resume = () => {
+                this.cmd.kill('SIGCONT')
+            }
+            job.cmd.run()
         }
 
         return job
     }
-    add = (src) => {
-        log(`[MC][ADD]${nodePath.basename(src)}`)
-        this.state.todos.push(this._toMP3(src))
+    _toSplit = (src) => {
+        let job = {
+            src: src,
+            type: "_toSplit"
+        }
+
+        job.run = () => {
+            this._onJobStart(job)
+            let p = spawn("bin/split2flac", [src, '-of', "@track. @artist - @title.@ext", "-o", nodePath.dirname(src)])
+            p.stdout.on('data', () => {});
+            p.stderr.on('data', () => {});
+            p.on("exit", code => {
+                if (code) {
+                    let err = new Error(`split2flac exited with fail code: ${code}`)
+                    error(`[MC][${job.type}][error][${nodePath.basename(job.src)}]: ${err.message}`)
+                    this._onJobFinish(job, err)
+                } else {
+                    fs.remove(src).then(() => {
+                        log(`[MC][${job.type}][done][${nodePath.basename(job.src)}]`)
+                        this._onJobFinish(job)
+                        this._scan(nodePath.dirname(src))
+                    }).catch(e => error(e))
+                }
+            })
+        }
+
+        return job
+    }
+    add = (src, type = "_toMP3") => {
+        log(`[MC][ADD][${type}]${nodePath.basename(src)}`)
+        this.state.todos.push(this[type](src))
         if (!this.state.doing.length)
             this._spin()
     }
