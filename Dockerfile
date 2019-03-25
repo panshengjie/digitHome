@@ -4,7 +4,7 @@ MAINTAINER panda panshengjie1@126.com
 RUN apt-get update
 RUN apt-get install -y curl
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
-RUN apt-get install -y nodejs cuetools shntool flac
+RUN apt-get install -y nodejs cuetools shntool flac imagemagick enca wavpack
 
 WORKDIR /homeDigit
 COPY package*.json ./
