@@ -1,13 +1,17 @@
 FROM ubuntu:18.04
+MAINTAINER panda panshengjie1@126.com
 
-RUN apt-get install -y curl cuetools shntool flac build-essential
-RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
-RUN apt-get install -y nodejs
+RUN apt-get update
+RUN apt-get install -y curl
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN apt-get install -y nodejs cuetools shntool flac
 
-COPY . /src
-RUN cd /src;npm i -g cnpm --registry=https://registry.npm.taobao.org; npm i
+WORKDIR /homeDigit
+COPY package*.json ./
 
-WORKDIR /home/panda/homeDigit
+RUN npm i -g cnpm --registry=https://registry.npm.taobao.org; cnpm i
+
+COPY . .
 
 EXPOSE 8080
 CMD ["npm", "start"]
