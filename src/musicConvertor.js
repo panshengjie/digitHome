@@ -22,8 +22,7 @@ class MusicConvertor {
     }
     _clear = () => {
         let ps = []
-        ps.push(fs.remove(nodePath.join(this.watchDIR, "spliting")))
-        ps.push(fs.remove(nodePath.join(this.watchDIR, "toMP3")))
+        ps.push(fs.remove(nodePath.join(this.watchDIR, "lock")))
         return Promise.all(ps).catch(e => error(e))
     }
     _scan = (dir) => {
@@ -57,8 +56,8 @@ class MusicConvertor {
     }
     _onJobStart = (job) => {
         fs.writeFile(nodePath.join(this.watchDIR, "lock"), "MusicConvertor is working on this dir", 'utf8')
-        log(`[MC][${job.type}][start][${nodePath.basename(job.src)}]`)
         this.state.doing.push(job)
+        log(`[MC][${job.type}][start]${nodePath.basename(job.src)}, #remain ${this.state.todos.length} jobs`)
     }
     _onJobFinish = (job, err) => {
         this.state.doing.remove(job)
@@ -124,7 +123,7 @@ class MusicConvertor {
             this._onJobStart(job)
             let p = spawn("bin/split2flac", [src, '-of', "@track. @artist - @title.@ext", "-o", nodePath.dirname(src)])
             p.stdout.on('data', () => {});
-            p.stderr.on('data', () => {});
+            p.stderr.on('data', (d) => {process.stderr.write(d)});
             p.on("exit", code => {
                 if (code) {
                     let err = new Error(`split2flac exited with fail code: ${code}`)
@@ -143,7 +142,6 @@ class MusicConvertor {
         return job
     }
     add = (src, type = "_toMP3") => {
-        log(`[MC][ADD][${type}]${nodePath.basename(src)}`)
         this.state.todos.push(this[type](src))
         if (!this.state.doing.length)
             this._spin()
