@@ -29,7 +29,7 @@ class MusicConvertor {
         if (!dir) { //fully scan
             if (this.state.doing.length) // no scan when is working
                 return;
-            dir = this.watchDIR
+            dir = nodePath.join(this.watchDIR, "src")
         }
         if (dir) {
             fs.readdir(dir)
@@ -81,12 +81,13 @@ class MusicConvertor {
         let dest = nodePath.join(nodePath.dirname(src), nodePath.basename(src).replace(nodePath.extname(src), ".mp3"))
         let job = {
             src: src,
-            dest: dest,
+            dest: dest.replace("src", "done"),
             type: "_toMP3",
             cmd: ffmpeg(src).audioCodec('libmp3lame').audioFrequency(44100).audioBitrate(320).outputOptions("-id3v2_version 3").output(dest),
         }
 
         job.run = () => {
+            fs.mkdirp(nodePath.dirname(job.dest)).catch(e => {})
             this._onJobStart(job)
             job.cmd.on('progress', ({ percent }) => {
                     job.progress = Math.round(percent)
@@ -123,7 +124,7 @@ class MusicConvertor {
             this._onJobStart(job)
             let p = spawn("bin/split2flac", [src, '-of', "@track. @artist - @title.@ext", "-o", nodePath.dirname(src)])
             p.stdout.on('data', () => {});
-            p.stderr.on('data', (d) => {process.stderr.write(d)});
+            p.stderr.on('data', (d) => { process.stderr.write(d) });
             p.on("exit", code => {
                 if (code) {
                     let err = new Error(`split2flac exited with fail code: ${code}`)
