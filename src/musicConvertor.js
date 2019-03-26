@@ -55,7 +55,7 @@ class MusicConvertor {
         }
     }
     _onJobStart = (job) => {
-        fs.writeFile(nodePath.join(this.watchDIR, "lock"), "MusicConvertor is working on this dir", 'utf8')
+        fs.writeFile(nodePath.join(this.watchDIR, "lock"), `${job.src}`, 'utf8')
         this.state.doing.push(job)
         log(`[MC][${job.type}][start]${nodePath.basename(job.src)}, #remain ${this.state.todos.length} jobs`)
     }
