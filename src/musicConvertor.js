@@ -55,7 +55,7 @@ class MusicConvertor {
         }
     }
     _onJobStart = (job) => {
-        fs.writeFile(nodePath.join(this.watchDIR, "lock"), `${job.src}`, 'utf8')
+        fs.writeFile(nodePath.join(this.watchDIR, "lock"), `${job.src} -> ${job.dest}`, 'utf8')
         this.state.doing.push(job)
         log(`[MC][${job.type}][start]${nodePath.basename(job.src)}, #remain ${this.state.todos.length} jobs`)
     }
@@ -78,10 +78,10 @@ class MusicConvertor {
         }
     }
     _toMP3 = (src) => {
-        let dest = nodePath.join(nodePath.dirname(src), nodePath.basename(src).replace(nodePath.extname(src), ".mp3"))
+        let dest = nodePath.join(nodePath.dirname(src), nodePath.basename(src).replace(nodePath.extname(src), ".mp3")).replace("src", "done")
         let job = {
             src: src,
-            dest: dest.replace("src", "done"),
+            dest: dest,
             type: "_toMP3",
             cmd: ffmpeg(src).audioCodec('libmp3lame').audioFrequency(44100).audioBitrate(320).outputOptions("-id3v2_version 3").output(dest),
         }
