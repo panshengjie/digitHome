@@ -14,6 +14,8 @@ class MusicConvertor {
         }
         this.watchDIR = dir
         log(`[MC]watchDIR ${dir}`)
+        fs.mkdirp(nodePath.join(dir, "src")).catch(e => {})
+        fs.mkdirp(nodePath.join(dir, "done")).catch(e => {})
 
         this._clear().then(() => {
             this._scan()
@@ -34,12 +36,15 @@ class MusicConvertor {
         if (dir) {
             fs.readdir(dir)
                 .then(files => {
+                    let jobCnt = 0;
                     let ps = files.map((file) => {
                         let abs = nodePath.join(dir, file)
                         return fs.stat(abs).then(stats => {
                             if (stats.isDirectory()) {
+                                jobCnt++;
                                 this._scan(abs)
                             } else if (nodePath.extname(file) === ".flac") {
+                                jobCnt++;
                                 let cueFile = nodePath.join(dir, file.replace(".flac", ".cue"))
                                 if (fs.existsSync(cueFile)) {
                                     this.add(abs, "_toSplit")
@@ -49,7 +54,10 @@ class MusicConvertor {
                             }
                         })
                     })
-                    return Promise.all(ps)
+                    return Promise.all(ps).then(() => {
+                        if (!jobCnt)
+                            fs.remove(dir).catch(e => error(e))
+                    })
                 })
                 .catch(e => { error(e) })
         }
