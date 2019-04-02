@@ -355,7 +355,7 @@ split_file () {
 
 	if [ $? -ne 0 ]; then
 		[ "${CHARSET}" = "utf-8" ] \
-			&& emsg "Cue sheet is not utf-8\n" \
+			&& emsg "Cue sheet is not utf-8, is ${CHARSET}\n" \
 			|| emsg "Unable to convert cue sheet from ${CHARSET} to utf-8\n"
 
 		if [ ${NASK} -eq 0 ]; then
