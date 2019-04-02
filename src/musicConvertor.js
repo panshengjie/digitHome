@@ -43,13 +43,16 @@ class MusicConvertor {
                             if (stats.isDirectory()) {
                                 jobCnt++;
                                 this._scan(abs)
-                            } else if (nodePath.extname(file) === ".flac") {
-                                jobCnt++;
-                                let cueFile = nodePath.join(dir, file.replace(".flac", ".cue"))
-                                if (fs.existsSync(cueFile)) {
-                                    this.add(abs, "_toSplit")
-                                } else {
-                                    this.add(abs)
+                            } else {
+                                let ext = nodePath.extname(file)
+                                if ([".flac", ".FLAC", ".wav", ".WAV", ".ape", ".APE"].contains(ext)) {
+                                    jobCnt++;
+                                    let cueFile = nodePath.join(dir, file.replace(".flac", ".cue"))
+                                    if (fs.existsSync(cueFile)) {
+                                        this.add(abs, "_toSplit")
+                                    } else {
+                                        this.add(abs)
+                                    }
                                 }
                             }
                         })
