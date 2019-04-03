@@ -14,10 +14,14 @@ class MusicConvertor {
         }
         this.watchDIR = dir
         log(`[MC]watchDIR ${dir}`)
-        fs.mkdirp(nodePath.join(dir, "src")).catch(e => {})
-        fs.mkdirp(nodePath.join(dir, "done")).catch(e => {})
 
-        this._clear().then(() => {
+        let init = []
+
+        init.push(fs.mkdirp(nodePath.join(dir, "src")))
+        init.push(fs.mkdirp(nodePath.join(dir, "done")))
+        init.push(this._clear())
+
+        Promise.all(init).then(() => {
             this._scan()
         })
         setInterval(this._scan, 60 * 60 * 1000)
