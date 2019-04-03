@@ -52,7 +52,7 @@ class MusicConvertor {
                                 let ext = nodePath.extname(file)
                                 if (targetsFiles.contains(ext)) {
                                     jobCnt++;
-                                    let cueFile = nodePath.join(dir, file.replace(".flac", ".cue"))
+                                    let cueFile = nodePath.join(dir, file.replace(ext, ".cue"))
                                     if (fs.existsSync(cueFile)) {
                                         this.add(abs, "_toSplit")
                                     } else {
@@ -138,7 +138,7 @@ class MusicConvertor {
 
         job.run = () => {
             this._onJobStart(job)
-            let p = spawn("bin/split2flac", [src, '-of', "@track. @artist - @title.@ext", "-nask", "-o", nodePath.dirname(src), "-f", nodePath.extname(src).substr(1)])
+            let p = spawn("bin/split2flac", [src, '-of', "@track. @artist - @title.@ext", "-nask", "-o", nodePath.dirname(src)])
             p.stdout.on('data', (d) => { process.stderr.write(d) });
             p.stderr.on('data', (d) => { process.stderr.write(d) });
             p.on("exit", code => {
