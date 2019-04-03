@@ -141,7 +141,9 @@ class MusicConvertor {
         try {
             const { encoding } = detectCharacterEncoding(fs.readFileSync(job.cueFile));
             job.cueCharset = encoding
-        } catch (e => error(e))
+        } catch (e) {
+            error(e)
+        }
 
         job.run = () => {
             this._onJobStart(job)
