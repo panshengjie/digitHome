@@ -138,7 +138,7 @@ class MusicConvertor {
 
         job.run = () => {
             this._onJobStart(job)
-            let p = spawn("bin/split2flac", [src, '-of', "@track. @artist - @title.@ext", "-nask", "-o", nodePath.dirname(src)])
+            let p = spawn("bin/split2flac", [src, '-of', "@track. @artist - @title.@ext", "-nask", "-o", nodePath.dirname(src), "-f", nodePath.extname(src)])
             p.stdout.on('data', (d) => { process.stderr.write(d) });
             p.stderr.on('data', (d) => { process.stderr.write(d) });
             p.on("exit", code => {
