@@ -23,7 +23,8 @@
     "rotating-file-stream": "^1.4.0",
     "serve-index": "^1.9.1",
     "sharp": "^0.20.5",
-    "xml2js": "^0.4.19"
+    "xml2js": "^0.4.19",
+    "detect-character-encoding": "^0.7.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

@@ -2,6 +2,7 @@ import ffmpegStatic from "ffmpeg-static"
 import ffmpeg from "fluent-ffmpeg"
 import nodePath from "path"
 import { spawn } from 'child_process'
+import detectCharacterEncoding from 'detect-character-encoding'
 import fs from "fs-extra"
 ffmpeg.setFfmpegPath(ffmpegStatic.path)
 
@@ -133,12 +134,28 @@ class MusicConvertor {
     _toSplit = (src) => {
         let job = {
             src: src,
+            cueFile: src.replace(nodePath.extname(src), ".cue"),
+            cueCharset: undefined,
             type: "_toSplit"
         }
+        try {
+            const { encoding } = detectCharacterEncoding(fs.readFileSync(job.cueFile));
+            job.cueCharset = encoding
+        } catch (e => error(e))
 
         job.run = () => {
             this._onJobStart(job)
-            let p = spawn("bin/split2flac", [src, '-of', "@track. @artist - @title.@ext", "-nask", "-o", nodePath.dirname(src)])
+            let args = [src,
+                '-of', "@track. @artist - @title.@ext",
+                "-nask",
+                "-o", nodePath.dirname(src),
+                "-cue", job.cueFile
+            ]
+            if (job.cueCharset) {
+                args.push("-cuecharset")
+                args.push(job.cueCharset)
+            }
+            let p = spawn("bin/split2flac", args)
             p.stdout.on('data', (d) => { process.stderr.write(d) });
             p.stderr.on('data', (d) => { process.stderr.write(d) });
             p.on("exit", code => {
