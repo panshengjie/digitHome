@@ -3,8 +3,9 @@ import ffmpeg from "fluent-ffmpeg"
 import nodePath from "path"
 import { spawn } from 'child_process'
 import fs from "fs-extra"
-
 ffmpeg.setFfmpegPath(ffmpegStatic.path)
+
+let targetsFiles = [".flac", ".FLAC", ".wav", ".WAV", ".ape", ".APE"]
 
 class MusicConvertor {
     constructor(dir) {
@@ -49,7 +50,7 @@ class MusicConvertor {
                                 this._scan(abs)
                             } else {
                                 let ext = nodePath.extname(file)
-                                if ([".flac", ".FLAC", ".wav", ".WAV", ".ape", ".APE"].contains(ext)) {
+                                if (targetsFiles.contains(ext)) {
                                     jobCnt++;
                                     let cueFile = nodePath.join(dir, file.replace(".flac", ".cue"))
                                     if (fs.existsSync(cueFile)) {
@@ -62,7 +63,7 @@ class MusicConvertor {
                         })
                     })
                     return Promise.all(ps).then(() => {
-                        if (!jobCnt)
+                        if (!jobCnt && dir !== nodePath.join(this.watchDIR, "src"))
                             fs.remove(dir).catch(e => error(e))
                     })
                 })
