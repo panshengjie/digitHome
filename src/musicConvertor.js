@@ -223,7 +223,7 @@ class MusicConvertor {
     }
     add = (src, type = "_toMP3") => {
         this.state.todos.push(this[type](src))
-        if (!this.state.doing.length)
+        if (this.state.doing.length < threads)
             this._spin()
     }
     remove = (src) => {
