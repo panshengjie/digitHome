@@ -106,6 +106,7 @@ class MusicConvertor {
         if (!this.state.todos.length && !this.state.doing.length) {
             fs.remove(nodePath.join(this.watchDIR, "lock")).catch(e => error(e))
             log(`[MC][idle]:all jobs done`)
+            this._scan()
         }
     }
     _toMP3 = (src) => {
