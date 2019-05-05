@@ -6,7 +6,7 @@ import detectCharacterEncoding from 'detect-character-encoding'
 import fs from "fs-extra"
 ffmpeg.setFfmpegPath(ffmpegStatic.path)
 
-let targetsFiles = [".flac", ".FLAC", ".wav", ".WAV", ".ape", ".APE"]
+let targetsFiles = [".flac", ".wav", ".ape"]
 
 class MusicConvertor {
     constructor(dir) {
@@ -43,25 +43,33 @@ class MusicConvertor {
             fs.readdir(dir)
                 .then(files => {
                     let jobCnt = 0;
-                    let ps = files.map((file) => {
+                    let ps = files.map(async (file) => {
                         let abs = nodePath.join(dir, file)
-                        return fs.stat(abs).then(stats => {
-                            if (stats.isDirectory()) {
+                        let stats = await fs.stat(abs)
+
+                        if (stats.isDirectory()) {
+                            jobCnt++;
+                            this._scan(abs)
+                        } else {
+                            let ext = nodePath.extname(file)
+                            let ext_lc = ext.toLowerCase()
+                            if (ext !== ext_lc) {
+                                await fs.move(file, file.replace(ext, ext_lc))
+                            }
+                            if (targetsFiles.contains(ext_lc)) {
                                 jobCnt++;
-                                this._scan(abs)
-                            } else {
-                                let ext = nodePath.extname(file)
-                                if (targetsFiles.contains(ext)) {
-                                    jobCnt++;
-                                    let cueFile = nodePath.join(dir, file.replace(ext, ".cue"))
-                                    if (fs.existsSync(cueFile)) {
-                                        this.add(abs, "_toSplit")
-                                    } else {
-                                        this.add(abs)
-                                    }
+                                let cueFile = nodePath.join(dir, file.replace(ext_lc, ".cue"))
+                                if (fs.existsSync(cueFile)) {
+                                    this.add(abs, "_toSplit")
+                                } else if ([".ape"].contains(ext_lc)) {
+                                    this.add(abs, "_fromAPE")
+                                } else {
+                                    this.add(abs)
                                 }
                             }
-                        })
+                        }
+
+
                     })
                     return Promise.all(ps).then(() => {
                         if (!jobCnt && dir !== nodePath.join(this.watchDIR, "src"))
@@ -127,6 +135,35 @@ class MusicConvertor {
                 this.cmd.kill('SIGCONT')
             }
             job.cmd.run()
+        }
+
+        return job
+    }
+    _fromAPE = (src) => {
+        let job = {
+            src: src,
+            dest: src.replace(".ape", ".wav"),
+            type: "_fromAPE"
+        }
+        job.run = () => {
+            this._onJobStart(job)
+            let args = [src, job.dest, "-d"]
+            let p = spawn("mac", args)
+            p.stdout.on('data', (d) => { process.stderr.write(d) });
+            p.stderr.on('data', (d) => { process.stderr.write(d) });
+            p.on("exit", code => {
+                if (code) {
+                    let err = new Error(`mac exited with fail code: ${code}`)
+                    error(`[MC][${job.type}][error][${nodePath.basename(job.src)}]: ${err.message}`)
+                    this._onJobFinish(job, err)
+                } else {
+                    fs.remove(src).then(() => {
+                        log(`[MC][${job.type}][done][${nodePath.basename(job.src)}]`)
+                        this.add(job.dest)
+                        this._onJobFinish(job)
+                    }).catch(e => error(e))
+                }
+            })
         }
 
         return job
