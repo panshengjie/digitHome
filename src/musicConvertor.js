@@ -87,7 +87,7 @@ class MusicConvertor {
     }
     _onJobFinish = (job, err) => {
         this.state.doing.remove(job)
-        if (!this.state.doing.length) {
+        if (this.state.doing.length < threads) {
             this._spin()
         }
         if (!err) {
