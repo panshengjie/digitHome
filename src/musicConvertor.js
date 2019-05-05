@@ -7,6 +7,7 @@ import fs from "fs-extra"
 ffmpeg.setFfmpegPath(ffmpegStatic.path)
 
 let targetsFiles = [".flac", ".wav", ".ape", ".aiff", ".dff"]
+let threads = 4;
 
 class MusicConvertor {
     constructor(dir) {
@@ -95,9 +96,14 @@ class MusicConvertor {
     }
     _spin = () => {
         if (this.state.todos.length) {
-            let job = this.state.todos.shift()
-            job && job.run()
-        } else {
+            let c = threads - this.state.doing.length
+            while (c--) {
+                let job = this.state.todos.shift()
+                job && job.run()
+            }
+        }
+
+        if (!this.state.todos.length && !this.state.doing.length) {
             fs.remove(nodePath.join(this.watchDIR, "lock")).catch(e => error(e))
             log(`[MC][idle]:all jobs done`)
         }
