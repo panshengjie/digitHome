@@ -6,7 +6,7 @@ import detectCharacterEncoding from 'detect-character-encoding'
 import fs from "fs-extra"
 ffmpeg.setFfmpegPath(ffmpegStatic.path)
 
-let targetsFiles = [".flac", ".wav", ".ape"]
+let targetsFiles = [".flac", ".wav", ".ape", ".aiff", ".dff"]
 
 class MusicConvertor {
     constructor(dir) {
