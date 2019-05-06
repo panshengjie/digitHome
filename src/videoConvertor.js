@@ -17,7 +17,7 @@ class VideoConvertor {
         }
         this.watchDIR = dir
         this.srcDirs = []
-        log(`[VC]watchDIR ${dir}}`)
+        log(`[VC]watchDIR ${dir}`)
 
         this.config = {
             x265: (src) => {
