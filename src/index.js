@@ -7,6 +7,7 @@ import cors from "cors"
 import session from 'express-session'
 import { showAllRoutes } from "utils/utils.js"
 import MC from "musicConvertor.js"
+import VC from "videoConvertor.js"
 
 (async () => {
     log("homeDigit starting...")
@@ -36,4 +37,5 @@ import MC from "musicConvertor.js"
     })
 
     let mc = new MC(`/convertor/toMP3`)
+    let vc = new MC(`/convertor`)
 })()
