@@ -37,5 +37,5 @@ import VC from "videoConvertor.js"
     })
 
     let mc = new MC(`/convertor/toMP3`)
-    let vc = new MC(`/convertor`)
+    let vc = new VC(`/convertor`)
 })()
