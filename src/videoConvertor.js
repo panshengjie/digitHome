@@ -21,21 +21,21 @@ class VideoConvertor {
 
         this.config = {
             x265: (src) => {
-                let cmd = ffmpeg(src, { niceness: -19 })
+                let cmd = ffmpeg(src, { niceness: "-19" })
                     .addOptions(["-max_muxing_queue_size 9999", "-map 0", "-c:s copy", "-c:v libx265",
                         "-preset medium", "-x265-params crf=22:pools=4", "-c:a aac", "-b:a 192k"
                     ])
                 return this.createJob("x265", src, cmd)
             },
             toAAC: (src) => {
-                let cmd = ffmpeg(src, { niceness: -18 })
+                let cmd = ffmpeg(src, { niceness: "-18" })
                     .addOptions(["-max_muxing_queue_size 9999", "-map 0", "-c:v copy",
                         "-c:a aac", "-b:a 192k", "-threads 3"
                     ])
                 return this.createJob("toAAC", src, cmd)
             },
             mobile: (src) => {
-                let cmd = ffmpeg(src, { niceness: -17 })
+                let cmd = ffmpeg(src, { niceness: "-17" })
                     .addOptions(["-max_muxing_queue_size 9999", "-map 0", "-c:s copy",
                         "-c:v libx264", "-pix_fmt yuv420p", "-preset veryfast", "-s 1280x720",
                         "-r 24", "-crf 24", "-threads 3", "-c:a aac", "-b:a 92k"
