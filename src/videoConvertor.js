@@ -98,15 +98,8 @@ class VideoConvertor {
         fs.writeFile(nodePath.join(this.watchDIR, "lock"), `${job.src} -> ${job.dest}`, 'utf8')
         this.state.doing.push(job)
         log(`[VC][${job.type}][start]${nodePath.basename(job.src)}, #remain ${this.state.todos.length} jobs`)
-        job.progressPrintTimer = setInterval(() => {
-            log(`[MC][${job.type}][${job.progress}][${nodePath.basename(job.src)}]`)
-        }, 30 * 1000)
     }
     _onJobFinish = (job, err) => {
-        if (job.progressPrintTimer) {
-            clearInterval(job.progressPrintTimer)
-            delete job.progressPrintTimer
-        }
         this.state.doing.remove(job)
         if (this.state.doing.length < threads) {
             this._spin()
