@@ -25,7 +25,6 @@ class VideoConvertor {
                     .addOptions(["-max_muxing_queue_size 9999", "-map 0", "-c:s copy", "-c:v libx265",
                         "-preset medium", "-x265-params crf=22:pools=4", "-c:a aac", "-b:a 192k"
                     ])
-                    .output(dest)
                 return this.createJob("x265", src, cmd)
             },
             toAAC: (src) => {
@@ -33,7 +32,6 @@ class VideoConvertor {
                     .addOptions(["-max_muxing_queue_size 9999", "-map 0", "-c:v copy",
                         "-c:a aac", "-b:a 192k", "-threads 3"
                     ])
-                    .output(dest)
                 return this.createJob("toAAC", src, cmd)
             },
             mobile: (src) => {
@@ -42,7 +40,6 @@ class VideoConvertor {
                         "-c:v libx264", "-pix_fmt yuv420p", "-preset veryfast", "-s 1280x720",
                         "-r 24", "-crf 24", "-threads 3", "-c:a aac", "-b:a 92k"
                     ])
-                    .output(dest)
                 return this.createJob("mobile", src, cmd)
             }
         }
@@ -132,7 +129,7 @@ class VideoConvertor {
             src: src,
             dest: dest,
             type: type,
-            cmd: cmd,
+            cmd: cmd.output(dest),
         }
 
         job.run = () => {
