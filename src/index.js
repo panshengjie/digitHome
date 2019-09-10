@@ -36,6 +36,6 @@ import VC from "videoConvertor.js"
         log(`homeDigit start on ${this.address().port}`)
     })
 
-    let mc = new MC(`/convertor/audio/toMP3`)
-    let vc = new VC(`/convertor/video`)
+    let mc = new MC(`./convertor/audio/toMP3`)
+    let vc = new VC(`./convertor/video`)
 })()
