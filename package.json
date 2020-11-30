@@ -20,12 +20,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "fs-extra": "^7.0.0",
     "lodash.isequal": "^4.5.0",
-    "os": "^0.1.1",
-    "rotating-file-stream": "^1.4.0",
-    "serve-index": "^1.9.1",
-    "sharp": "^0.20.5",
-    "simplecrawler": "^1.1.8",
-    "xml2js": "^0.4.19"
+    "simplecrawler": "^1.1.8"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
